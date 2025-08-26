@@ -5,6 +5,14 @@ exports.addToCart = async (req,res) => {
         const {itemId,size} = req.body;
         const userId = req.user._id;      // As we set the user in req in auth middleware
         const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json(
+                {
+                    success: false,
+                    message: "User not found",
+                }
+            );
+        }
         let cartData = user.cartData;
         if(cartData[itemId]) {
             if(cartData[itemId][size]) {
@@ -22,7 +30,7 @@ exports.addToCart = async (req,res) => {
             {
                 success: true,
                 data: updatedUser.cartData,
-                message: `Product added to cart`
+                message: `added to cart`
             }
         );
 
@@ -30,7 +38,6 @@ exports.addToCart = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in addToCart`,
                 message: error.message
             }
         );
@@ -45,18 +52,24 @@ exports.updateCart = async (req,res) => {
         const {itemId,size,quantity} = req.body;
         const userId = req.user._id;
         const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json(
+                {
+                    success: false,
+                    message: "User not found",
+                }
+            );
+        }
         let cartData = user.cartData;
         if(cartData[itemId]) {
             if(cartData[itemId][size]) {
                 if(quantity) {
                     cartData[itemId][size] = quantity;
-                } else {
-                   
+                } else {   
                     if(Object.keys(cartData[itemId]).length === 1) {
                         delete cartData[itemId];
                     } else {
                         delete cartData[itemId][size];
-                     
                     }
                 }
             }
@@ -66,14 +79,13 @@ exports.updateCart = async (req,res) => {
             {
                 success: true,
                 data: updatedUser.cartData,
-                message: `Cart updated`
+                message: `${Object.keys(updatedUser.cartData).length === 0 ? `No items left` : `Cart updated`}`
             }
         );
     } catch (error) {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in updateCart`,
                 message: error.message
             }
         );
@@ -87,19 +99,25 @@ exports.getCartDataOfAnUser = async (req,res) => {
     try {
         const userId = req.user._id;
         const user = await User.findById(userId);
-        const cartData = user.cartData;
+        if (!user) {
+            return res.status(404).json(
+                {
+                    success: false,
+                    message: "User not found",
+                }
+            );
+        }
         return res.status(200).json(
             {
                 success: true,
-                data: cartData,
-                message: `cart fetched`
+                data: user.cartData,
+                message: `your cart`
             }
         );
     } catch (error) {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in getCartDataOfAnUser`,
                 message: error.message
             }
         );

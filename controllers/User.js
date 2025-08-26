@@ -6,11 +6,11 @@ const jwt = require('jsonwebtoken');
 const mail = require('../utils/Mail');
 require('dotenv').config();
 
-exports.registerUser = async (req,res) => {
+exports.registerUser = async (req, res) => {
     try {
-        const {name,email,password,otp} = req.body;
-        
-        if(!validator.isEmail(email)) {
+        const { name, email, password, otp } = req.body;
+
+        if (!validator.isEmail(email)) {
             return res.status(400).json(
                 {
                     success: false,
@@ -19,8 +19,8 @@ exports.registerUser = async (req,res) => {
             );
         }
 
-        const existingUser = await User.findOne({email});
-        if(existingUser) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
             return res.status(401).json(
                 {
                     success: false,
@@ -29,7 +29,7 @@ exports.registerUser = async (req,res) => {
             );
         }
 
-        if(password.length < 8) {
+        if (password.length < 8) {
             return res.status(400).json(
                 {
                     success: false,
@@ -38,8 +38,8 @@ exports.registerUser = async (req,res) => {
             );
         }
 
-        const mostRecentOtpDocument = await Otp.findOne({email}).sort({createdAt: -1}).limit(1);
-        if(!mostRecentOtpDocument) {
+        const mostRecentOtpDocument = await Otp.findOne({ email }).sort({ createdAt: -1 }).limit(1);
+        if (!mostRecentOtpDocument) {
             return res.status(400).json(
                 {
                     success: false,
@@ -47,23 +47,23 @@ exports.registerUser = async (req,res) => {
                 }
             );
         }
-        if(mostRecentOtpDocument.otp !== otp) {
+        if (mostRecentOtpDocument.otp !== otp) {
             return res.status(401).json(
                 {
                     success: false,
-                    message: `Incorrect otp`
+                    message: `Incorrect OTP`
                 }
             );
         }
 
-        const hashedPassword = await bcrypt.hash(password,10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await User.create({name, email, password: hashedPassword, accountType: email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD ? 'Admin' : 'Customer', otps: [mostRecentOtpDocument._id]});
+        const user = await User.create({ name, email, password: hashedPassword, accountType: email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD ? 'Admin' : 'Customer', otps: [mostRecentOtpDocument._id] });
 
-        await mail(user.email,'Registration with Forever🤍','<h3>Congratulations🎉</h3><p>Your email registered successfully</p>');
+        await mail(user.email, 'Registration with Forever🤍', '<h3>Congratulations🎉</h3><p>Your email has been registered successfully</p>');
 
         const updatedOtp = await Otp.findByIdAndDelete(mostRecentOtpDocument._id);
-        const updatedUser = await User.findByIdAndUpdate(user._id,{$pull: {"otps": updatedOtp._id}},{new: true});
+        const updatedUser = await User.findByIdAndUpdate(user._id, { $pull: { "otps": updatedOtp._id } }, { new: true });
 
         return res.status(201).json(
             {
@@ -76,7 +76,6 @@ exports.registerUser = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in registerUser`,
                 message: error.message
             }
         );
@@ -86,12 +85,12 @@ exports.registerUser = async (req,res) => {
 
 
 
-exports.loginUser = async (req,res) => {
+exports.loginUser = async (req, res) => {
     try {
-        const {email,password} = req.body;
+        const { email, password } = req.body;
 
-        let existingUser = await User.findOne({email});
-        if(!existingUser) {
+        let existingUser = await User.findOne({ email });
+        if (!existingUser) {
             return res.status(401).json(
                 {
                     success: false,
@@ -100,8 +99,8 @@ exports.loginUser = async (req,res) => {
             );
         }
 
-        const correctPassword = await bcrypt.compare(password,existingUser.password);
-        if(!correctPassword) {
+        const correctPassword = await bcrypt.compare(password, existingUser.password);
+        if (!correctPassword) {
             return res.status(401).json(
                 {
                     success: false,
@@ -114,20 +113,21 @@ exports.loginUser = async (req,res) => {
             _id: existingUser._id,
             accountType: existingUser.accountType
         };
-        const loginToken = jwt.sign(payload,process.env.JWT_SECRET,{expiresIn:"1d"});
+        const loginToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 
         existingUser = existingUser.toObject();
         existingUser.password = undefined;
 
         const cookieOptions = {
             httpOnly: true,
+            secure: true,
             expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
         };
-        res.cookie("loginToken",loginToken,cookieOptions).status(201).json(
+        res.cookie("loginToken", loginToken, cookieOptions).status(201).json(
             {
                 success: true,
                 data: existingUser.accountType,
-                message: `Log in successful`
+                message: `Logged in`
             }
         );
 
@@ -135,7 +135,6 @@ exports.loginUser = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in loginUser`,
                 message: error.message
             }
         );
@@ -145,10 +144,10 @@ exports.loginUser = async (req,res) => {
 
 
 
-exports.getUsers = async (req,res) => {
+exports.getUsers = async (req, res) => {
     try {
         const users = await User.find();
-        if(users.length === 0) {
+        if (users.length === 0) {
             return res.status(404).json(
                 {
                     success: false,
@@ -167,7 +166,6 @@ exports.getUsers = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in getUsers`,
                 message: error.message
             }
         );
@@ -177,11 +175,11 @@ exports.getUsers = async (req,res) => {
 
 
 
-exports.getUser = async (req,res) => {
+exports.getUser = async (req, res) => {
     try {
-        const {userId} = req.params;
+        const { userId } = req.params;
         const user = await User.findById(userId);
-        if(!user) {
+        if (!user) {
             return res.status(400).json(
                 {
                     success: false,
@@ -200,7 +198,6 @@ exports.getUser = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in generateOtp`,
                 message: error.message
             }
         );
@@ -210,10 +207,10 @@ exports.getUser = async (req,res) => {
 
 
 
-exports.deleteUser = async (req,res) => {
+exports.deleteUser = async (req, res) => {
     try {
-        const {userId} = req.params;
-        if(!userId) {
+        const { userId } = req.params;
+        if (!userId) {
             return res.status(400).json(
                 {
                     success: false,
@@ -222,7 +219,7 @@ exports.deleteUser = async (req,res) => {
             );
         }
         const user = await User.findById(userId);
-        if(!user) {
+        if (!user) {
             return res.status(400).json(
                 {
                     success: false,
@@ -241,7 +238,6 @@ exports.deleteUser = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in deleteUser`,
                 message: error.message
             }
         );
@@ -250,22 +246,21 @@ exports.deleteUser = async (req,res) => {
 
 
 
-exports.logoutUser = async (req,res) => {
+exports.logoutUser = async (req, res) => {
     try {
-        res.clearCookie("loginToken",{
+        res.clearCookie("loginToken", {
             httpOnly: true,
         });
         return res.status(200).json(
             {
                 success: true,
-                message: `User logged out successfully`
+                message: `logged out`
             }
         );
     } catch (error) {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in logoutUser`,
                 message: error.message
             }
         );

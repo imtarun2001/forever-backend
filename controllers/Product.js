@@ -59,7 +59,6 @@ exports.getProducts = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in getProducts`,
                 message: error.message
             }
         );
@@ -92,7 +91,6 @@ exports.getProduct = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in getProduct`,
                 message: error.message
             }
         );

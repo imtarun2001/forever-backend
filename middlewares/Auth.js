@@ -8,7 +8,7 @@ exports.auth = (req,res,next) => {
             return res.status(404).json(
                 {
                     success: false,
-                    message: `Session expired. Login again`
+                    message: `need to login`
                 }
             );
         }
@@ -19,7 +19,6 @@ exports.auth = (req,res,next) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in auth`,
                 message: error.message
             }
         );
