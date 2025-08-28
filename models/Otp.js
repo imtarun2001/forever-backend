@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const mail = require('../utils/Mail');
+const registrationOtpTemplate = require('../templates/RegistrationOtp');
 
 const otpSchema = new mongoose.Schema(
     {
@@ -11,11 +12,9 @@ const otpSchema = new mongoose.Schema(
 
 otpSchema.pre("save",async function(next) {
     try {
-        await mail(this.email,'OTP for registration',this.otp);
+        await mail(this.email,'OTP for registration',registrationOtpTemplate(this.otp));
         next();
     } catch (error) {
-        console.log(`Error in otpSchema.pre save middleware`);
-        console.log(error);
         next(error);
     }
 });

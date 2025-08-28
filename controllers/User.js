@@ -4,8 +4,15 @@ const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mail = require('../utils/Mail');
+const passwordResetTemplate = require('../templates/ResetPassword');
+const accountCreationTemplate = require('../templates/AccountCreation');
+const accountLoggedInTemplate = require('../templates/AccountLoggedIn');
 require('dotenv').config();
 
+
+
+
+// sign up user
 exports.registerUser = async (req, res) => {
     try {
         const { name, email, password, otp } = req.body;
@@ -60,7 +67,7 @@ exports.registerUser = async (req, res) => {
 
         const user = await User.create({ name, email, password: hashedPassword, accountType: email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD ? 'Admin' : 'Customer', otps: [mostRecentOtpDocument._id] });
 
-        await mail(user.email, 'Registration with Forever🤍', '<h3>Congratulations🎉</h3><p>Your email has been registered successfully</p>');
+        await mail(user.email, 'Registration with Forever🤍', accountCreationTemplate(user.name));
 
         const updatedOtp = await Otp.findByIdAndDelete(mostRecentOtpDocument._id);
         const updatedUser = await User.findByIdAndUpdate(user._id, { $pull: { "otps": updatedOtp._id } }, { new: true });
@@ -85,6 +92,7 @@ exports.registerUser = async (req, res) => {
 
 
 
+// log in user
 exports.loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -130,6 +138,7 @@ exports.loginUser = async (req, res) => {
                 message: `Logged in`
             }
         );
+        await mail(existingUser.email,`Account Logged In`,accountLoggedInTemplate(existingUser.name));
 
     } catch (error) {
         return res.status(500).json(
@@ -144,6 +153,7 @@ exports.loginUser = async (req, res) => {
 
 
 
+// get all users
 exports.getUsers = async (req, res) => {
     try {
         const users = await User.find();
@@ -175,6 +185,7 @@ exports.getUsers = async (req, res) => {
 
 
 
+// get one user
 exports.getUser = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -207,6 +218,7 @@ exports.getUser = async (req, res) => {
 
 
 
+// delete one user
 exports.deleteUser = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -246,6 +258,7 @@ exports.deleteUser = async (req, res) => {
 
 
 
+// log out user
 exports.logoutUser = async (req, res) => {
     try {
         res.clearCookie("loginToken", {
@@ -255,6 +268,82 @@ exports.logoutUser = async (req, res) => {
             {
                 success: true,
                 message: `logged out`
+            }
+        );
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success: false,
+                message: error.message
+            }
+        );
+    }
+}
+
+
+
+
+// send a link to email who forgot password
+exports.forgotPasswordLinkToEmail = async (req, res) => {
+    try {
+        const {email} = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `Email not registered`
+                }
+            );
+        }
+        const forgotPasswordToken = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: "10m" });
+        await mail(email, `Password Reset Request 🔒`, passwordResetTemplate(`http://localhost:3000/verify-email/${forgotPasswordToken}`));
+        return res.status(201).json(
+            {
+                success: true,
+                message: `check your email`
+            }
+        );
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success: false,
+                message: error.message
+            }
+        );
+    }
+}
+
+
+
+
+// after verification of the link reset the password
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { forgotPasswordTokenFromFrontend, newPassword } = req.body;
+        const userId = jwt.verify(forgotPasswordTokenFromFrontend, process.env.JWT_SECRET);  // As I have sent userId as string while jwt.sign(), I can simply destructure it
+        if (!userId) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `Link expired`
+                }
+            );
+        }
+        const hashedPassword = await bcrypt.hash(newPassword,10);
+        const existingUser = await User.findByIdAndUpdate(userId,{password: hashedPassword},{new: true});
+        if (!existingUser) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `You may be a hacker, but do not mess with developer😎`
+                }
+            );
+        }
+        return res.status(200).json(
+            {
+                success: true,
+                message: `password reset successful`
             }
         );
     } catch (error) {
