@@ -297,7 +297,7 @@ exports.forgotPasswordLinkToEmail = async (req, res) => {
             );
         }
         const forgotPasswordToken = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: "10m" });
-        await mail(email, `Password Reset Request 🔒`, passwordResetTemplate(`http://localhost:3000/verify-email/${forgotPasswordToken}`));
+        await mail(email, `Password Reset Request 🔒`, passwordResetTemplate(`https://forever-frontend-eight-xi.vercel.app/verify-email/${forgotPasswordToken}`));
         return res.status(201).json(
             {
                 success: true,
