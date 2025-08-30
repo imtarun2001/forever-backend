@@ -3,7 +3,7 @@ const User = require('../models/User');
 exports.addToCart = async (req,res) => {
     try {
         const {itemId,size} = req.body;
-        const userId = req.user._id;      // As we set the user in req in auth middleware
+        const userId = req.user._id;
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json(
@@ -13,7 +13,7 @@ exports.addToCart = async (req,res) => {
                 }
             );
         }
-        let cartData = user.cartData;
+        let cartData = await user.cartData;
         if(cartData[itemId]) {
             if(cartData[itemId][size]) {
                 cartData[itemId][size] += 1;
@@ -24,12 +24,11 @@ exports.addToCart = async (req,res) => {
             cartData[itemId] = {};
             cartData[itemId][size] = 1;
         }
-        const updatedUser = await User.findByIdAndUpdate(user._id,{cartData},{new: true});
+        await User.findByIdAndUpdate(user._id,{cartData});
 
         return res.status(201).json(
             {
                 success: true,
-                data: updatedUser.cartData,
                 message: `added to cart`
             }
         );
@@ -60,26 +59,21 @@ exports.updateCart = async (req,res) => {
                 }
             );
         }
-        let cartData = user.cartData;
-        if(cartData[itemId]) {
-            if(cartData[itemId][size]) {
-                if(quantity) {
-                    cartData[itemId][size] = quantity;
-                } else {   
-                    if(Object.keys(cartData[itemId]).length === 1) {
-                        delete cartData[itemId];
-                    } else {
-                        delete cartData[itemId][size];
-                    }
-                }
+        let cartData = await user.cartData;
+        if(quantity === 0) {
+            if(Object.keys(cartData[itemId]).length === 0) {
+                delete cartData[itemId];
+            } else {
+                delete cartData[itemId][size];
             }
+        } else {
+            cartData[itemId][size] = quantity;
         }
         const updatedUser = await User.findByIdAndUpdate(user._id,{cartData},{new: true});
         return res.status(200).json(
             {
                 success: true,
-                data: updatedUser.cartData,
-                message: `${Object.keys(updatedUser.cartData).length === 0 ? `No items left` : `Cart updated`}`
+                message: `${Object.keys(updatedUser.cartData).length === 0 ? `no items left` : `cart updated`}`
             }
         );
     } catch (error) {

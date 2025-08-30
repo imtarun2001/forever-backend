@@ -10,7 +10,7 @@ userRouter.post("/user/loginUser", loginUser);
 userRouter.get("/user/getUsers", getUsers);
 userRouter.get("/user/getUser/:userId", getUser);
 userRouter.delete("/user/deleteUser/:userId", deleteUser);
-userRouter.post("/user/logoutUser", logoutUser);
+userRouter.post("/user/logoutUser", auth, logoutUser);
 userRouter.post("/user/forgotPasswordLinkToEmail", forgotPasswordLinkToEmail);
 userRouter.post("/user/forgotPassword", forgotPassword);
 

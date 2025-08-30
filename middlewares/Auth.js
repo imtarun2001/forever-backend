@@ -8,7 +8,7 @@ exports.auth = (req,res,next) => {
             return res.status(404).json(
                 {
                     success: false,
-                    message: `need to login`
+                    message: `need to login or signup first`
                 }
             );
         }

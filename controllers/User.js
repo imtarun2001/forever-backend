@@ -97,6 +97,17 @@ exports.loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // const {_id} = req.user;
+
+        // if(_id) {
+        //     return res.status(401).json(
+        //         {
+        //             success: false,
+        //             message: `already logged in with an account`
+        //         }
+        //     );
+        // }
+
         let existingUser = await User.findOne({ email });
         if (!existingUser) {
             return res.status(401).json(
@@ -261,6 +272,15 @@ exports.deleteUser = async (req, res) => {
 // log out user
 exports.logoutUser = async (req, res) => {
     try {
+        const {_id} = req.user;
+        if(!_id) {
+            return res.status(400).json(
+                {
+                    success: false,
+                    message: `log in first to logout`
+                }
+            )
+        }
         res.clearCookie("loginToken", {
             httpOnly: true,
         });

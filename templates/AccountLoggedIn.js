@@ -15,7 +15,7 @@ const accountLoggedInTemplate = (name) => {
                 </tr>
                 <tr>
                     <td style="padding:30px; color:#333333; text-align:center;">
-                        <p style="font-size:16px;">Your account has been successfully created.</p>
+                        <p style="font-size:16px;">You have successfully logged in to your account.</p>
                         <p style="font-size:14px; color:#666; margin-top:15px;">Explore thousands of products, save your favorites and enjoy a seamless shopping experience.</p>
                         <a href="https://forever-frontend-eight-xi.vercel.app/" 
                             style="display:inline-block; margin-top:20px; padding:12px 24px; background-color:#4CAF50; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold;">

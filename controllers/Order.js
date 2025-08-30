@@ -6,7 +6,15 @@ const User = require('../models/User');
 // order by COD
 exports.orderByCod = async (req,res) => {
     try {
-        const {firstName,lastName,email,street,zipCode,city,state,country,phone,amount} = req.body;
+        const {firstName,lastName,email,street,zipCode,city,state,country,phone,paymentMethod,amount} = req.body;
+        if(paymentMethod !== 'cod') {
+            return res.status(400).json(
+                {
+                    success: false,
+                    message: `only applicable for cod`
+                }
+            );
+        }
         const {_id} = req.user;
         const existingUser = await User.findById(_id);
         if(!existingUser) {
