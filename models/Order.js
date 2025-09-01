@@ -16,7 +16,7 @@ const orderSchema = new mongoose.Schema(
         state: { type: String, required: true },
         country: { type: String, required: true },
         phone: { type: Number, required: true },
-        itemsOrdered: { type: Object, required: true, default: {} },
+        itemsOrdered: { type: Array, required: true },
         orderStatus: { type: String, required: true, default: 'Order Placed' },
         paymentMethod: { type: String, required: true },
         paymentStatus: { type: Boolean, required: true, default: false },
@@ -35,8 +35,8 @@ orderSchema.post("save", async (doc) => {
             month: "short",
             day: "numeric"
         });
-        const user = await User.findOne({email: doc.email});
-        if (user) {
+        const user = await User.findById(doc.user);
+        if (doc.email === user.email) {
             return await mail(doc.email, 'Order Placed', orderPlacedTemplate(doc.firstName, doc.email, doc._id, createdDate, doc.amount));
         } else {
             const user = await User.findById(doc.user);

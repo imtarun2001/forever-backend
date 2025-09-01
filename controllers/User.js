@@ -76,7 +76,7 @@ exports.registerUser = async (req, res) => {
             {
                 success: true,
                 data: updatedUser,
-                message: `User registered successfully`
+                message: `registration successful`
             }
         );
     } catch (error) {
@@ -97,17 +97,6 @@ exports.loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // const {_id} = req.user;
-
-        // if(_id) {
-        //     return res.status(401).json(
-        //         {
-        //             success: false,
-        //             message: `already logged in with an account`
-        //         }
-        //     );
-        // }
-
         let existingUser = await User.findOne({ email });
         if (!existingUser) {
             return res.status(401).json(
@@ -123,7 +112,7 @@ exports.loginUser = async (req, res) => {
             return res.status(401).json(
                 {
                     success: false,
-                    message: `You have entered incorrect password`
+                    message: `incorrect password`
                 }
             );
         }
@@ -146,10 +135,10 @@ exports.loginUser = async (req, res) => {
             {
                 success: true,
                 data: existingUser.accountType,
-                message: `Logged in`
+                message: `welcome back ${existingUser.name.split(' ').shift()}`
             }
         );
-        await mail(existingUser.email,`Account Logged In`,accountLoggedInTemplate(existingUser.name));
+        await mail(existingUser.email, `Account Logged In`, accountLoggedInTemplate(existingUser.name));
 
     } catch (error) {
         return res.status(500).json(
@@ -272,8 +261,8 @@ exports.deleteUser = async (req, res) => {
 // log out user
 exports.logoutUser = async (req, res) => {
     try {
-        const {_id} = req.user;
-        if(!_id) {
+        const { _id } = req.user;
+        if (!_id) {
             return res.status(400).json(
                 {
                     success: false,
@@ -306,7 +295,7 @@ exports.logoutUser = async (req, res) => {
 // send a link to email who forgot password
 exports.forgotPasswordLinkToEmail = async (req, res) => {
     try {
-        const {email} = req.body;
+        const { email } = req.body;
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json(
@@ -316,7 +305,7 @@ exports.forgotPasswordLinkToEmail = async (req, res) => {
                 }
             );
         }
-        const forgotPasswordToken = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: "10m" });
+        const forgotPasswordToken = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "10m" });
         await mail(email, `Password Reset Request 🔒`, passwordResetTemplate(`https://forever-frontend-eight-xi.vercel.app/verify-email/${forgotPasswordToken}`));
         return res.status(201).json(
             {
@@ -350,8 +339,8 @@ exports.forgotPassword = async (req, res) => {
                 }
             );
         }
-        const hashedPassword = await bcrypt.hash(newPassword,10);
-        const existingUser = await User.findByIdAndUpdate(userId,{password: hashedPassword},{new: true});
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const existingUser = await User.findByIdAndUpdate(userId, { password: hashedPassword }, { new: true });
         if (!existingUser) {
             return res.status(401).json(
                 {
@@ -364,6 +353,65 @@ exports.forgotPassword = async (req, res) => {
             {
                 success: true,
                 message: `password reset successful`
+            }
+        );
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success: false,
+                message: error.message
+            }
+        );
+    }
+}
+
+
+
+
+exports.adminLogin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `please register first`
+                }
+            );
+        }
+        if (user.accountType !== 'Admin') {
+            return res.status(404).json(
+                {
+                    success: false,
+                    message: `only for admin`
+                }
+            );
+        }
+        const correctPassword = await bcrypt.compare(password, user.password);
+        if (!correctPassword) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `incorrect password`
+                }
+            );
+        }
+        const payload = {
+            _id: user._id,
+            accountType: user.accountType
+        };
+        const loginToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const cookieOptions = {
+            httpOnly: true,
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            secure: true
+        };
+        res.cookie('loginToken', loginToken, cookieOptions).status(200).json(
+            {
+                success: true,
+                data: user.accountType,
+                message: `welcome back admin`
             }
         );
     } catch (error) {

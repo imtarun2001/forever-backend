@@ -34,7 +34,7 @@ exports.isAdmin = (req,res,next) => {
             return res.status(401).json(
                 {
                     success: false,
-                    message: `O Oh Only Admin`
+                    message: `O Oh!! Only Admin`
                 }
             );
         }
@@ -43,7 +43,6 @@ exports.isAdmin = (req,res,next) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in isAdmin`,
                 message: error.message
             }
         );

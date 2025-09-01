@@ -10,7 +10,7 @@ exports.generateOtp = async (req,res) => {
             return res.status(401).json(
                 {
                     success: false,
-                    message: `Email already registered`
+                    message: `already registered email`
                 }
             );
         }
@@ -32,14 +32,13 @@ exports.generateOtp = async (req,res) => {
         return res.status(201).json(
             {
                 success: true,
-                message: `Otp sent email`
+                message: `otp sent to email`
             }
         );
     } catch (error) {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in generateOtp`,
                 message: error.message
             }
         );

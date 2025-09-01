@@ -27,14 +27,13 @@ exports.createProduct = async (req,res) => {
             {
                 success: true,
                 data: product,
-                message: `Product created successfully`
+                message: `product created`
             }
         );
     } catch (error) {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in createProduct`,
                 message: error.message
             }
         );
@@ -52,7 +51,6 @@ exports.getProducts = async (req,res) => {
             {
                 success: true,
                 data: products,
-                message: `Products fetched successfully`
             }
         );
     } catch (error) {
@@ -83,8 +81,7 @@ exports.getProduct = async (req,res) => {
         return res.status(200).json(
             {
                 success: true,
-                data: product,
-                message: `Product fetched successfully`
+                data: product
             }
         );
     } catch (error) {
@@ -115,7 +112,6 @@ exports.deleteProduct = async (req,res) => {
         return res.status(200).json(
             {
                 success: true,
-                data: product,
                 message: `productId is missing`
             }
         );
@@ -123,7 +119,6 @@ exports.deleteProduct = async (req,res) => {
         return res.status(500).json(
             {
                 success: false,
-                data: `Error in deleteProduct`,
                 message: error.message
             }
         );

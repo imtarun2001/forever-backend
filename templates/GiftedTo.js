@@ -20,7 +20,7 @@ const giftedToTemplate = (name,giftedFrom,email,orderId,date) => {
                         
                         <tr>
                             <td style="padding:30px;">
-                            <p style="font-size:16px; margin:0 0 15px;">Hi ${name},</p>
+                            <p style="font-size:16px; margin:0 0 15px;">Hi ${name.split(' ').shift()},</p>
                             <p style="font-size:16px; margin:0 0 20px;">
                                 We’re excited to let you know that ${giftedFrom} has sent you gift(s).  
                                 Here are the details:
