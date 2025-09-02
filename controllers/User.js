@@ -133,8 +133,8 @@ exports.customerLogin = async (req, res) => {
 
         const cookieOptions = {
             httpOnly: true,
-            secure: true,
-            sameSite: "None",
+            // secure: true,
+            // sameSite: "None",
             expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
         };
         res.cookie("customerLoginToken", customerLoginToken, cookieOptions).status(201).json(
@@ -212,8 +212,8 @@ exports.adminLogin = async (req, res) => {
         const adminLoginToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
         const cookieOptions = {
             httpOnly: true,
-            secure: true,
-            sameSite: "None",
+            // secure: true,
+            // sameSite: "None",
             expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
         };
         res.cookie('adminLoginToken', adminLoginToken, cookieOptions).status(200).json(
