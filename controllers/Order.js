@@ -1,9 +1,14 @@
+
+
+
+
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Stripe = require('stripe');
 require('dotenv').config();
 const currency = 'inr';
 const deliveryFee = 10;
+
 
 
 
@@ -58,7 +63,6 @@ exports.orderByCod = async (req, res) => {
         )
     }
 }
-
 
 
 
@@ -157,14 +161,17 @@ exports.orderByStripe = async (req, res) => {
     }
 }
 
+
+
+
 // verify stripe payment
-exports.verifyStripe = async (req,res) => {
+exports.verifyStripe = async (req, res) => {
     try {
-        const {orderId,success} = req.body;
+        const { orderId, success } = req.body;
         const userId = req.user._id;
-        if(success === 'true') {
-            await Order.findByIdAndUpdate(orderId,{paymentStatus: true},{new: true});
-            await User.findByIdAndUpdate(userId,{cartData: {}});
+        if (success === 'true') {
+            await Order.findByIdAndUpdate(orderId, { paymentStatus: true }, { new: true });
+            await User.findByIdAndUpdate(userId, { cartData: {} });
             return res.status(200).json(
                 {
                     success: true,
@@ -183,23 +190,11 @@ exports.verifyStripe = async (req,res) => {
         }
     } catch (error) {
         return res.status(500).json(
-                {
-                    success: false,
-                    message: error.message
-                }
-            );
-    }
-}
-
-
-
-
-// order by razorpay
-exports.orderByRazorpay = async (req, res) => {
-    try {
-
-    } catch (error) {
-
+            {
+                success: false,
+                message: error.message
+            }
+        );
     }
 }
 
@@ -227,7 +222,6 @@ exports.getOrdersOfAnUser = async (req, res) => {
         );
     }
 }
-
 
 
 

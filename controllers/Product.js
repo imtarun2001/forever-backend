@@ -1,14 +1,22 @@
+
+
+
+
 const Product = require('../models/Product');
 const cloudinaryUploader = require('../utils/Cloudinary');
 
-exports.createProduct = async (req,res) => {
+
+
+
+// create product
+exports.createProduct = async (req, res) => {
     try {
-        const {name,description,price,category,subCategory,sizes,bestSeller} = req.body;
-        const {image1,image2,image3,image4} = req.files;
-        const images = [image1,image2,image3,image4].filter(image => image !== undefined);
+        const { name, description, price, category, subCategory, sizes, bestSeller } = req.body;
+        const { image1, image2, image3, image4 } = req.files;
+        const images = [image1, image2, image3, image4].filter(image => image !== undefined);
         const arrayOfImagesUrl = await Promise.all(
-                images.map(async (image) => {
-                const result = await cloudinaryUploader(image,'forever/products');
+            images.map(async (image) => {
+                const result = await cloudinaryUploader(image, 'forever/products');
                 return result.secure_url;
             })
         );
@@ -43,8 +51,8 @@ exports.createProduct = async (req,res) => {
 
 
 
-
-exports.getProducts = async (req,res) => {
+// get all products
+exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find();
         return res.status(200).json(
@@ -66,11 +74,12 @@ exports.getProducts = async (req,res) => {
 
 
 
-exports.getProduct = async (req,res) => {
+// get single product
+exports.getProduct = async (req, res) => {
     try {
-        const {productId} = req.params;
+        const { productId } = req.params;
         const product = await Product.findById(productId);
-        if(!product) {
+        if (!product) {
             return res.status(404).json(
                 {
                     success: false,
@@ -97,11 +106,12 @@ exports.getProduct = async (req,res) => {
 
 
 
-exports.deleteProduct = async (req,res) => {
+// delete a product
+exports.deleteProduct = async (req, res) => {
     try {
-        const {productId} = req.params;
+        const { productId } = req.params;
         const product = await Product.findByIdAndDelete(productId);
-        if(!product) {
+        if (!product) {
             return res.status(404).json(
                 {
                     success: false,

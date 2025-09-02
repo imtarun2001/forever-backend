@@ -1,4 +1,11 @@
+
+
+
+
 const mongoose = require('mongoose');
+
+
+
 
 const productSchema = new mongoose.Schema(
     {
@@ -9,9 +16,12 @@ const productSchema = new mongoose.Schema(
         category: { type: String, required: true },
         subCategory: { type: String, required: true },
         sizes: { type: Array, required: true },
-        bestSeller: {type: Boolean}
+        bestSeller: { type: Boolean }
     },
-    {timestamps: true}
+    { timestamps: true }
 );
 
-module.exports = mongoose.model("Product",productSchema);
+
+
+
+module.exports = mongoose.model("Product", productSchema);

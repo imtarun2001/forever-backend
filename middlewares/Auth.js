@@ -1,19 +1,27 @@
+
+
+
+
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-exports.auth = (req,res,next) => {
+
+
+
+// authenticate customer
+exports.authCustomer = (req, res, next) => {
     try {
-        const loginToken = req.cookies.loginToken;
-        if(!loginToken) {
+        const customerLoginToken = req.cookies.customerLoginToken;
+        if (!customerLoginToken) {
             return res.status(404).json(
                 {
                     success: false,
-                    message: `need to login or signup first`
+                    message: `login required`
                 }
             );
         }
-        const decodedLoginToken = jwt.verify(loginToken,process.env.JWT_SECRET);
-        req.user = decodedLoginToken;
+        const verifiedToken = jwt.verify(customerLoginToken, process.env.JWT_SECRET);
+        req.user = verifiedToken;
         next();
     } catch (error) {
         return res.status(500).json(
@@ -28,9 +36,20 @@ exports.auth = (req,res,next) => {
 
 
 
-exports.isAdmin = (req,res,next) => {
+// authenticate admin
+exports.authAdmin = (req, res, next) => {
     try {
-        if(req.user.accountType !== 'Admin') {
+        const adminLoginToken = req.cookies.adminLoginToken;
+        if (!adminLoginToken) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `login required`
+                }
+            );
+        }
+        const verifiedToken = jwt.verify(adminLoginToken, process.env.JWT_SECRET);
+        if (verifiedToken.accountType !== 'Admin') {
             return res.status(401).json(
                 {
                     success: false,
@@ -38,6 +57,7 @@ exports.isAdmin = (req,res,next) => {
                 }
             );
         }
+        req.user = verifiedToken;
         next();
     } catch (error) {
         return res.status(500).json(

@@ -1,8 +1,15 @@
+
+
+
+
 const mongoose = require('mongoose');
 const mail = require('../utils/Mail');
 const orderPlacedTemplate = require('../templates/OrderPlaced');
 const User = require('./User');
 const giftedToTemplate = require('../templates/GiftedTo');
+
+
+
 
 const orderSchema = new mongoose.Schema(
     {
@@ -51,4 +58,4 @@ orderSchema.post("save", async (doc) => {
 
 
 
-module.exports = mongoose.model("order", orderSchema);
+module.exports = mongoose.model("Order", orderSchema);

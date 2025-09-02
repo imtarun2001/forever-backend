@@ -1,8 +1,16 @@
+
+
+
+
 const User = require('../models/User');
 
-exports.addToCart = async (req,res) => {
+
+
+
+// add to cart
+exports.addToCart = async (req, res) => {
     try {
-        const {itemId,size} = req.body;
+        const { itemId, size } = req.body;
         const userId = req.user._id;
         const user = await User.findById(userId);
         if (!user) {
@@ -14,8 +22,8 @@ exports.addToCart = async (req,res) => {
             );
         }
         let cartData = await user.cartData;
-        if(cartData[itemId]) {
-            if(cartData[itemId][size]) {
+        if (cartData[itemId]) {
+            if (cartData[itemId][size]) {
                 cartData[itemId][size] += 1;
             } else {
                 cartData[itemId][size] = 1;
@@ -24,7 +32,7 @@ exports.addToCart = async (req,res) => {
             cartData[itemId] = {};
             cartData[itemId][size] = 1;
         }
-        await User.findByIdAndUpdate(user._id,{cartData});
+        await User.findByIdAndUpdate(user._id, { cartData });
 
         return res.status(201).json(
             {
@@ -46,9 +54,10 @@ exports.addToCart = async (req,res) => {
 
 
 
-exports.updateCart = async (req,res) => {
+// update cart
+exports.updateCart = async (req, res) => {
     try {
-        const {itemId,size,quantity} = req.body;
+        const { itemId, size, quantity } = req.body;
         const userId = req.user._id;
         const user = await User.findById(userId);
         if (!user) {
@@ -60,8 +69,8 @@ exports.updateCart = async (req,res) => {
             );
         }
         let cartData = await user.cartData;
-        if(quantity === 0) {
-            if(Object.keys(cartData[itemId]).length === 0) {
+        if (quantity === 0) {
+            if (Object.keys(cartData[itemId]).length === 0) {
                 delete cartData[itemId];
             } else {
                 delete cartData[itemId][size];
@@ -69,7 +78,7 @@ exports.updateCart = async (req,res) => {
         } else {
             cartData[itemId][size] = quantity;
         }
-        const updatedUser = await User.findByIdAndUpdate(user._id,{cartData},{new: true});
+        const updatedUser = await User.findByIdAndUpdate(user._id, { cartData }, { new: true });
         return res.status(200).json(
             {
                 success: true,
@@ -89,7 +98,8 @@ exports.updateCart = async (req,res) => {
 
 
 
-exports.getCartDataOfAnUser = async (req,res) => {
+// get all cart items of a customer
+exports.getCartDataOfAnUser = async (req, res) => {
     try {
         const userId = req.user._id;
         const user = await User.findById(userId);

@@ -1,4 +1,4 @@
-const orderPlacedTemplate = (name,email,orderId,date,amount,userId) => {
+const orderPlacedTemplate = (name, email, orderId, date, amount, userId) => {
     return `
     <!DOCTYPE html>
         <html>

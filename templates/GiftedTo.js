@@ -1,4 +1,4 @@
-const giftedToTemplate = (name,giftedFrom,email,orderId,date) => {
+const giftedToTemplate = (name, giftedFrom, email, orderId, date) => {
     return `
     <!DOCTYPE html>
         <html>

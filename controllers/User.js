@@ -1,4 +1,9 @@
+
+
+
+
 const User = require('../models/User');
+const Order = require('../models/Order');
 const Otp = require('../models/Otp');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
@@ -92,8 +97,8 @@ exports.registerUser = async (req, res) => {
 
 
 
-// log in user
-exports.loginUser = async (req, res) => {
+// log in customer
+exports.customerLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -121,7 +126,7 @@ exports.loginUser = async (req, res) => {
             _id: existingUser._id,
             accountType: existingUser.accountType
         };
-        const loginToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const customerLoginToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 
         existingUser = existingUser.toObject();
         existingUser.password = undefined;
@@ -129,9 +134,10 @@ exports.loginUser = async (req, res) => {
         const cookieOptions = {
             httpOnly: true,
             secure: true,
+            sameSite: "None",
             expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
         };
-        res.cookie("loginToken", loginToken, cookieOptions).status(201).json(
+        res.cookie("customerLoginToken", customerLoginToken, cookieOptions).status(201).json(
             {
                 success: true,
                 data: existingUser.accountType,
@@ -140,6 +146,107 @@ exports.loginUser = async (req, res) => {
         );
         await mail(existingUser.email, `Account Logged In`, accountLoggedInTemplate(existingUser.name));
 
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success: false,
+                message: error.message
+            }
+        );
+    }
+}
+
+
+
+
+// log out customer
+exports.customerLogout = async (req, res) => {
+    try {
+        return res.clearCookie("customerLoginToken", {
+            httpOnly: true,
+        }).status(200).json(
+            {
+                success: true,
+                message: `logged out`
+            }
+        );
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success: false,
+                message: error.message
+            }
+        );
+    }
+}
+
+
+
+
+// login admin
+exports.adminLogin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const existingUser = await User.findOne({ email });
+        if (!existingUser) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `please register first`
+                }
+            );
+        }
+        const correctPassword = await bcrypt.compare(password, existingUser.password);
+        if (!correctPassword) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `incorrect password`
+                }
+            );
+        }
+        const payload = {
+            _id: existingUser._id,
+            accountType: existingUser.accountType
+        };
+        const adminLoginToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const cookieOptions = {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        };
+        res.cookie('adminLoginToken', adminLoginToken, cookieOptions).status(200).json(
+            {
+                success: true,
+                data: existingUser.accountType,
+                message: `welcome back admin`
+            }
+        );
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success: false,
+                message: error.message
+            }
+        );
+    }
+}
+
+
+
+
+// logout admin
+exports.adminLogout = async (req, res) => {
+    try {
+        return res.clearCookie("adminLoginToken", {
+            httpOnly: true
+        }).status(200).json(
+            {
+                success: true,
+                message: `logged out`
+            }
+        );
     } catch (error) {
         return res.status(500).json(
             {
@@ -230,7 +337,7 @@ exports.deleteUser = async (req, res) => {
                 }
             );
         }
-        const user = await User.findById(userId);
+        const user = await User.findByIdAndDelete(userId);
         if (!user) {
             return res.status(400).json(
                 {
@@ -239,44 +346,12 @@ exports.deleteUser = async (req, res) => {
                 }
             );
         }
+        await Order.deleteMany({ user: userId });
         return res.status(200).json(
             {
                 success: true,
                 data: user,
-                message: `User deleted successfully`
-            }
-        );
-    } catch (error) {
-        return res.status(500).json(
-            {
-                success: false,
-                message: error.message
-            }
-        );
-    }
-}
-
-
-
-// log out user
-exports.logoutUser = async (req, res) => {
-    try {
-        const { _id } = req.user;
-        if (!_id) {
-            return res.status(400).json(
-                {
-                    success: false,
-                    message: `log in first to logout`
-                }
-            )
-        }
-        res.clearCookie("loginToken", {
-            httpOnly: true,
-        });
-        return res.status(200).json(
-            {
-                success: true,
-                message: `logged out`
+                message: `user and it's orders deleted successfully`
             }
         );
     } catch (error) {
@@ -330,7 +405,7 @@ exports.forgotPasswordLinkToEmail = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { forgotPasswordTokenFromFrontend, newPassword } = req.body;
-        const userId = jwt.verify(forgotPasswordTokenFromFrontend, process.env.JWT_SECRET);  // As I have sent userId as string while jwt.sign(), I can simply destructure it
+        const userId = jwt.verify(forgotPasswordTokenFromFrontend, process.env.JWT_SECRET);
         if (!userId) {
             return res.status(401).json(
                 {
@@ -353,65 +428,6 @@ exports.forgotPassword = async (req, res) => {
             {
                 success: true,
                 message: `password reset successful`
-            }
-        );
-    } catch (error) {
-        return res.status(500).json(
-            {
-                success: false,
-                message: error.message
-            }
-        );
-    }
-}
-
-
-
-
-exports.adminLogin = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json(
-                {
-                    success: false,
-                    message: `please register first`
-                }
-            );
-        }
-        if (user.accountType !== 'Admin') {
-            return res.status(404).json(
-                {
-                    success: false,
-                    message: `only for admin`
-                }
-            );
-        }
-        const correctPassword = await bcrypt.compare(password, user.password);
-        if (!correctPassword) {
-            return res.status(401).json(
-                {
-                    success: false,
-                    message: `incorrect password`
-                }
-            );
-        }
-        const payload = {
-            _id: user._id,
-            accountType: user.accountType
-        };
-        const loginToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
-        const cookieOptions = {
-            httpOnly: true,
-            expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            secure: true
-        };
-        res.cookie('loginToken', loginToken, cookieOptions).status(200).json(
-            {
-                success: true,
-                data: user.accountType,
-                message: `welcome back admin`
             }
         );
     } catch (error) {

@@ -1,6 +1,13 @@
+
+
+
+
 const mongoose = require('mongoose');
 const mail = require('../utils/Mail');
 const registrationOtpTemplate = require('../templates/RegistrationOtp');
+
+
+
 
 const otpSchema = new mongoose.Schema(
     {
@@ -10,13 +17,19 @@ const otpSchema = new mongoose.Schema(
     }
 );
 
-otpSchema.pre("save",async function(next) {
+
+
+
+otpSchema.pre("save", async function (next) {
     try {
-        await mail(this.email,'OTP for registration',registrationOtpTemplate(this.otp));
+        await mail(this.email, 'OTP for registration', registrationOtpTemplate(this.otp));
         next();
     } catch (error) {
         next(error);
     }
 });
 
-module.exports = mongoose.model("Otp",otpSchema);
+
+
+
+module.exports = mongoose.model("Otp", otpSchema);

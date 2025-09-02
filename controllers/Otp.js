@@ -1,12 +1,16 @@
-const Otp = require('../models/Otp');
-const otpGenerator = require('otp-generator');
-const User = require('../models/User');
 
-exports.generateOtp = async (req,res) => {
+
+
+
+const Otp = require('../models/Otp');
+const User = require('../models/User');
+const otpGenerator = require('otp-generator');
+
+exports.generateOtp = async (req, res) => {
     try {
-        const {email} = req.body;
-        const existingUser = await User.findOne({email});
-        if(existingUser) {
+        const { email } = req.body;
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
             return res.status(401).json(
                 {
                     success: false,
@@ -14,21 +18,21 @@ exports.generateOtp = async (req,res) => {
                 }
             );
         }
-        let otp = otpGenerator.generate(6,{
+        let otp = otpGenerator.generate(6, {
             lowerCaseAlphabets: false,
             upperCaseAlphabets: false,
             specialChars: false
         });
-        let result = await Otp.findOne({otp});
-        while(result) {
-            otp = otpGenerator.generate(6,{
+        let result = await Otp.findOne({ otp });
+        while (result) {
+            otp = otpGenerator.generate(6, {
                 lowerCaseAlphabets: false,
                 upperCaseAlphabets: false,
                 specialChars: false
             });
-            result = await Otp.findOne({otp});
+            result = await Otp.findOne({ otp });
         }
-        await Otp.create({email,otp});
+        await Otp.create({ email, otp });
         return res.status(201).json(
             {
                 success: true,

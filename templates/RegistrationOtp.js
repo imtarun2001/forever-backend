@@ -1,5 +1,5 @@
 const registrationOtpTemplate = (otp) => {
-    return `
+  return `
   <!DOCTYPE html>
     <html>
       <head>
