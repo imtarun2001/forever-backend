@@ -3,7 +3,7 @@ const app = express();
 const cookieParser = require('cookie-parser');
 const expressFileUpload = require('express-fileupload');
 const cors = require('cors');
-const allowedOrigins = ['http://localhost:3000','http://localhost:3500','https://forever-frontend-eight-xi.vercel.app','https://forever-admin-brown-one.vercel.app/'];
+const allowedOrigins = ['http://localhost:3000','http://localhost:3500','https://forever-frontend-eight-xi.vercel.app','https://forever-admin-brown-one.vercel.app/','forever-admin-jl4cts1yv-taruns-projects-67c133f6.vercel.app'];
 require('dotenv').config();
 const userRouter = require('./routes/User');
 const otpRouter = require('./routes/Otp');
