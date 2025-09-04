@@ -26,12 +26,7 @@ app.use(expressFileUpload(
 ));
 app.use(cors(
     {
-        origin: (origin,callback) => {
-            !origin || allowedOrigins.includes(origin) ?
-            callback(null,true)
-            :
-            callback(new Error(`Origin not allowed`));
-        },
+        origin: allowedOrigins,
         credentials: true,
     }
 ));
