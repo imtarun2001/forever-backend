@@ -3,11 +3,11 @@ const express = require('express');
 const userRouter = express.Router();
 
 const { registerUser, customerLogin, customerLogout, getUsers, getUser, deleteUser, forgotPasswordLinkToEmail, forgotPassword, adminLogin, adminLogout } = require('../controllers/User');
-const { authCustomer, authAdmin } = require('../middlewares/Auth');
+const { checkUser, authCustomer, authAdmin } = require('../middlewares/Auth');
 
 
 
-
+userRouter.get("/user/checkUser",checkUser);
 userRouter.post("/user/registerUser", registerUser);
 userRouter.post("/user/customerLogin", customerLogin);
 userRouter.post("/user/customerLogout", authCustomer, customerLogout);

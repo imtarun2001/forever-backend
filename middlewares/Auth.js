@@ -8,6 +8,38 @@ require('dotenv').config();
 
 
 
+// check user exist in local storage but in cookie or not
+exports.checkUser = async (req, res) => {
+    try {
+        const customerLoginToken = req.cookies.customerLoginToken;
+        if (!customerLoginToken) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `session expired login again`
+                }
+            );
+        }
+        const verifiedToken = jwt.verify(customerLoginToken, process.env.JWT_SECRET);
+        return res.status(200).json(
+            {
+                success: true,
+                data: verifiedToken._id
+            }
+        );
+    } catch (error) {
+        return res.status(500).json(
+            {
+                success: false,
+                message: error.message
+            }
+        );
+    }
+}
+
+
+
+
 // authenticate customer
 exports.authCustomer = (req, res, next) => {
     try {

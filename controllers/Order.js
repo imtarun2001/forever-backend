@@ -42,6 +42,7 @@ exports.orderByCod = async (req, res) => {
         res.status(201).json(
             {
                 success: true,
+                data: existingUser._id,
                 message: `order placed`
             }
         );
@@ -157,6 +158,7 @@ exports.verifyStripe = async (req, res) => {
             return res.status(200).json(
                 {
                     success: true,
+                    data: userId,
                     message: `payment success`
                 }
             );
