@@ -35,14 +35,13 @@ exports.orderByCod = async (req, res) => {
             );
         }
 
-        const order = await Order.create({ user: existingUser._id, firstName, lastName, email, street, zipCode, city, state, country, phone, itemsOrdered, paymentMethod, paymentStatus: false, amount });
+        await Order.create({ user: existingUser._id, firstName, lastName, email, street, zipCode, city, state, country, phone, itemsOrdered, paymentMethod, paymentStatus: false, amount });
 
         existingUser.cartData = {};
         await existingUser.save();
         res.status(201).json(
             {
                 success: true,
-                data: order,
                 message: `order placed`
             }
         );
@@ -158,7 +157,6 @@ exports.verifyStripe = async (req, res) => {
             return res.status(200).json(
                 {
                     success: true,
-                    data: userId,
                     message: `payment success`
                 }
             );
