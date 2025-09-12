@@ -140,7 +140,7 @@ exports.customerLogin = async (req, res) => {
         res.cookie("customerLoginToken", customerLoginToken, cookieOptions).status(201).json(
             {
                 success: true,
-                data: existingUser.accountType,
+                data: existingUser._id,
                 message: `welcome back ${existingUser.name.split(' ').shift()}`
             }
         );
