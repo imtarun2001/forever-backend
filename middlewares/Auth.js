@@ -21,7 +21,7 @@ exports.authCustomer = (req, res, next) => {
             );
         }
         const verifiedToken = jwt.verify(customerLoginToken, process.env.JWT_SECRET);
-        if(!verifiedToken) {
+        if (!verifiedToken) {
             return res.status(401).json(
                 {
                     success: false,
@@ -29,7 +29,7 @@ exports.authCustomer = (req, res, next) => {
                 }
             );
         }
-        if(verifiedToken.accountType !== 'Customer') {
+        if (verifiedToken.accountType !== 'Customer') {
             return res.status(403).json(
                 {
                     success: false,
@@ -65,7 +65,7 @@ exports.authAdmin = (req, res, next) => {
             );
         }
         const verifiedToken = jwt.verify(adminLoginToken, process.env.JWT_SECRET);
-        if(!verifiedToken) {
+        if (!verifiedToken) {
             return res.status(401).json(
                 {
                     success: false,
