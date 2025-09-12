@@ -164,6 +164,8 @@ exports.customerLogout = async (req, res) => {
     try {
         return res.clearCookie("customerLoginToken", {
             httpOnly: true,
+            secure: true,
+            sameSite: "None",
         }).status(200).json(
             {
                 success: true,
@@ -240,7 +242,9 @@ exports.adminLogin = async (req, res) => {
 exports.adminLogout = async (req, res) => {
     try {
         return res.clearCookie("adminLoginToken", {
-            httpOnly: true
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
         }).status(200).json(
             {
                 success: true,

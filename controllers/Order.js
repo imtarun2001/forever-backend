@@ -24,26 +24,18 @@ exports.orderByCod = async (req, res) => {
                 }
             );
         }
-        const { _id, accountType } = req.user;
-        const existingUser = await User.findById(_id);
+        const userId = req.user._id;
+        const existingUser = await User.findById(userId);
         if (!existingUser) {
             return res.status(401).json(
                 {
                     success: false,
-                    message: `only registered users can order`
-                }
-            );
-        }
-        if (accountType !== 'Customer') {
-            return res.status(401).json(
-                {
-                    success: false,
-                    message: `only customers can order`
+                    message: `you are not registered`
                 }
             );
         }
 
-        const order = await Order.create({ user: _id, firstName, lastName, email, street, zipCode, city, state, country, phone, itemsOrdered, paymentMethod, paymentStatus: false, amount });
+        const order = await Order.create({ user: existingUser._id, firstName, lastName, email, street, zipCode, city, state, country, phone, itemsOrdered, paymentMethod, paymentStatus: false, amount });
 
         existingUser.cartData = {};
         await existingUser.save();
@@ -85,22 +77,13 @@ exports.orderByStripe = async (req, res) => {
             );
         }
 
-        const { _id, accountType } = req.user;
+        const { _id } = req.user;
         const existingUser = await User.findById(_id);
         if (!existingUser) {
             return res.status(401).json(
                 {
                     success: false,
-                    message: `only registered users can order`
-                }
-            );
-        }
-
-        if (accountType !== 'Customer') {
-            return res.status(401).json(
-                {
-                    success: false,
-                    message: `only applicable for stripe`
+                    message: `you are not registered`
                 }
             );
         }

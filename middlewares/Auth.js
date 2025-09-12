@@ -13,14 +13,30 @@ exports.authCustomer = (req, res, next) => {
     try {
         const customerLoginToken = req.cookies.customerLoginToken;
         if (!customerLoginToken) {
-            return res.status(404).json(
+            return res.status(401).json(
                 {
                     success: false,
-                    message: `login required`
+                    message: `session expired login again`
                 }
             );
         }
         const verifiedToken = jwt.verify(customerLoginToken, process.env.JWT_SECRET);
+        if(!verifiedToken) {
+            return res.status(401).json(
+                {
+                    success: false,
+                    message: `invalid token`
+                }
+            );
+        }
+        if(verifiedToken.accountType !== 'Customer') {
+            return res.status(403).json(
+                {
+                    success: false,
+                    message: `only for customers`
+                }
+            );
+        }
         req.user = verifiedToken;
         next();
     } catch (error) {
@@ -44,16 +60,24 @@ exports.authAdmin = (req, res, next) => {
             return res.status(401).json(
                 {
                     success: false,
-                    message: `login required`
+                    message: `session expired login again`
                 }
             );
         }
         const verifiedToken = jwt.verify(adminLoginToken, process.env.JWT_SECRET);
-        if (verifiedToken.accountType !== 'Admin') {
+        if(!verifiedToken) {
             return res.status(401).json(
                 {
                     success: false,
-                    message: `O Oh!! Only Admin`
+                    message: `invalid token`
+                }
+            );
+        }
+        if (verifiedToken.accountType !== 'Admin') {
+            return res.status(403).json(
+                {
+                    success: false,
+                    message: `only for admin`
                 }
             );
         }
