@@ -127,10 +127,6 @@ exports.customerLogin = async (req, res) => {
             accountType: existingUser.accountType
         };
         const customerLoginToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
-
-        existingUser = existingUser.toObject();
-        existingUser.password = undefined;
-
         const cookieOptions = {
             httpOnly: true,
             secure: true,
